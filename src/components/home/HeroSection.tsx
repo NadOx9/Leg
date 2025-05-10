@@ -10,6 +10,16 @@ const HeroSection: React.FC = () => {
   return (
     <section className="pt-32 pb-20 md:pt-40 md:pb-28 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-gray-50">
       <div className="container mx-auto max-w-4xl text-center">
+        
+        <motion.h2
+          className="text-2xl md:text-3xl font-bold text-yellow-600 mb-6"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          🚀 Build par Nadim
+        </motion.h2>
+
         <motion.h1 
           className="text-4xl md:text-5xl lg:text-6xl font-bold text-black leading-tight mb-6"
           initial={{ opacity: 0, y: 20 }}
