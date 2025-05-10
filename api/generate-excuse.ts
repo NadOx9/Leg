@@ -8,22 +8,20 @@ const openai = new OpenAI({
 const getPromptByType = (type: string) => {
   switch (type) {
     case 'serious':
-      return "You are Alibi AI, specialized in creating professional and believable excuses. Your responses should be formal, realistic, and appropriate for business or serious situations. Focus on credible scenarios that would be acceptable in a professional context. Keep responses under 50 words.";
+      return "You are Alibi AI, specialized in creating professional and believable excuses...";
     case 'cheeky':
-      return "You are Alibi AI, specialized in creating bold but plausible excuses. Your responses should be clever, slightly audacious, but still maintainable. Add a touch of wit while keeping it believable. Keep responses under 50 words.";
+      return "You are Alibi AI, specialized in creating bold but plausible excuses...";
     case 'funny':
-      return "You are Alibi AI, specialized in creating humorous and creative excuses. Your responses should be witty, imaginative, and entertaining. Feel free to be more playful and use amusing scenarios. Keep responses under 50 words.";
+      return "You are Alibi AI, specialized in creating humorous and creative excuses...";
     default:
-      return "You are Alibi AI, specialized in creating believable excuses. Your responses should be concise, realistic, and appropriate for the situation. Keep responses under 50 words.";
+      return "You are Alibi AI, specialized in creating believable excuses...";
   }
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Handle CORS
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -37,47 +35,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const { reason, type = 'serious' } = body || {};
 
-    console.log('🔥 Incoming body:', body);
-
     if (!reason) {
       return res.status(400).json({ error: 'Reason is required' });
     }
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: 'gpt-3.5-turbo',
       messages: [
-        {
-          role: "system",
-          content: getPromptByType(type)
-        },
-        {
-          role: "user",
-          content: `I need an excuse for: ${reason}`
-        }
+        { role: 'system', content: getPromptByType(type) },
+        { role: 'user', content: `I need an excuse for: ${reason}` }
       ],
-      temperature: type === 'serious' ? 0.3 : 0.7,
+      temperature: 0.7,
       max_tokens: 100
     });
 
     const excuse = completion.choices[0].message.content.trim();
-
-    console.log('✅ Final excuse to return:', excuse);
-
-    return res.status(200).json({ excuse }); // ✅ send as string
+    return res.status(200).json({ excuse });
   } catch (error: any) {
-    console.error('Error generating excuse:', error);
-
-    if (error.response?.status === 401) {
-      return res.status(500).json({ error: 'Invalid OpenAI API key' });
-    }
-
-    if (error.response?.status === 429) {
-      return res.status(429).json({ error: 'Rate limit exceeded. Please try again later.' });
-    }
-
     return res.status(500).json({
       error: 'Failed to generate excuse',
-      details: error.message
+      message: error.message
     });
   }
 }
