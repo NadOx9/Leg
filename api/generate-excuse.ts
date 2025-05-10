@@ -25,7 +25,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 
-  // Handle OPTIONS request for CORS preflight
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -35,7 +34,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { reason, type = 'serious' } = req.body;
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const { reason, type = 'serious' } = body || {};
+
+    console.log('🔥 Incoming body:', body);
 
     if (!reason) {
       return res.status(400).json({ error: 'Reason is required' });
@@ -58,7 +60,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     const excuse = completion.choices[0].message.content.trim();
-    return res.status(200).json({ excuse });
+
+    console.log('✅ Final excuse to return:', excuse);
+
+    return res.status(200).json({ excuse }); // ✅ send as string
   } catch (error: any) {
     console.error('Error generating excuse:', error);
 
