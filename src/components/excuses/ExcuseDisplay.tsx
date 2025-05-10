@@ -9,7 +9,6 @@ const ExcuseDisplay: React.FC = () => {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    // You could add a toast notification here
   };
 
   const shareExcuse = (text: string) => {
@@ -20,7 +19,6 @@ const ExcuseDisplay: React.FC = () => {
       }).catch(console.error);
     } else {
       copyToClipboard(text);
-      // You could add a toast notification here
     }
   };
 
@@ -41,6 +39,11 @@ const ExcuseDisplay: React.FC = () => {
     return null;
   }
 
+  const excuseText =
+    typeof excuses[0] === 'string'
+      ? excuses[0]
+      : excuses[0]?.excuse || JSON.stringify(excuses[0]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -50,25 +53,25 @@ const ExcuseDisplay: React.FC = () => {
     >
       <div className="p-6 md:p-8 border border-yellow-300 rounded-lg bg-yellow-50 shadow-sm">
         <h3 className="text-lg font-medium text-yellow-700 mb-2">Your Excuse</h3>
-        
+
         <p className="text-xl md:text-2xl font-medium text-gray-800 mb-6">
-          {excuses[0]}
+          {excuseText}
         </p>
-        
+
         <div className="flex flex-col sm:flex-row gap-3">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => copyToClipboard(excuses[0])}
+            onClick={() => copyToClipboard(excuseText)}
             icon={<Copy className="h-4 w-4" />}
           >
             Copy
           </Button>
-          
+
           <Button
             variant="outline"
             size="sm"
-            onClick={() => shareExcuse(excuses[0])}
+            onClick={() => shareExcuse(excuseText)}
             icon={<Share2 className="h-4 w-4" />}
           >
             Share
