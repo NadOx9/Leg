@@ -33,11 +33,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const { reason, type = 'serious' } = body || {};
+    console.log("📩 Received body:", body);
 
+    const { reason, type = 'serious' } = body || {};
     if (!reason) {
       return res.status(400).json({ error: 'Reason is required' });
     }
+
+    console.log("🚀 Sending to OpenAI:", { reason, type });
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
@@ -49,12 +52,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       max_tokens: 100
     });
 
+    console.log("✅ OpenAI response:", completion);
+
     const excuse = completion.choices[0].message.content.trim();
     return res.status(200).json({ excuse });
   } catch (error: any) {
+    console.error("❌ Error:", error);
     return res.status(500).json({
       error: 'Failed to generate excuse',
-      message: error.message
+      message: error.message || 'Unknown error'
     });
   }
 }
